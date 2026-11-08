@@ -9,13 +9,13 @@
   <meta name="description" content="Offline-first Cabin Service Manager reference for Aer Lingus long-haul operations.">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="styles.css?v=scrollhint1">
+  <link rel="stylesheet" href="styles.css?v=updates1">
   <title>CSM Companion</title>
 </head>
 <body>
   <header class="topbar">
     <a class="brand" href="#home" aria-label="CSM Companion home"><img class="brand-logo" src="assets/aer-lingus-shamrock.png" alt="Aer Lingus Shamrock"><span><strong>CSM Companion</strong><small>Long-haul quick reference</small></span></a>
-    <div class="top-actions"><span class="offline-pill"><i></i><span id="connection-status">Offline ready</span></span><button class="icon-button" id="install-button" hidden>Install</button></div>
+    <div class="top-actions"><span class="offline-pill"><i></i><span id="connection-status">Offline ready</span></span><button class="update-button" id="update-button" type="button" aria-label="Check for updates" title="Check for updates"><span aria-hidden="true">↻</span><span class="update-label">Update</span></button><button class="icon-button" id="install-button" hidden>Install</button></div>
   </header>
   <main>
     <section class="welcome" id="home">
@@ -34,11 +34,11 @@
       <button data-section="crew"><span>05</span>Crew admin <b>→</b></button>
       <button data-section="contacts"><span>06</span>Contacts &amp; links <b>→</b></button>
     </section>
-    <p class="quick-links-hint">scroll across for more</p>
+    <p class="quick-links-hint">Scroll across for more</p>
     <section class="content-area" id="content-area" aria-live="polite"></section>
     <footer><span>CSM COMPANION <i>·</i> OFFLINE REFERENCE</span><span id="cache-note">Core pages are stored on this device.</span></footer>
   </main>
   <script src="reference-data.js?v=coordination1"></script>
-  <script src="app.js?v=destarrow1"></script>
+  <script src="app.js?v=updates1"></script>
 </body>
 </html>

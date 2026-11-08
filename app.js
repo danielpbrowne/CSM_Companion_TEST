@@ -1,7 +1,7 @@
 const data = window.CSM_DATA;
 
 const sections = {
-  destinations: { title: 'Destination Guide', desc: 'Destination index and operational information from the destination register.' },
+  destinations: { title: 'Destination Guide', desc: 'Airport, station and hotel details for each destination.' },
   aircraft: { title: 'Aircraft Types', desc: 'Visual cabin seating, capacity, crew seats and registrations from the fleet workbook.' },
   flight: {
     title: 'Flight & duty', desc: 'Flight briefing references and current duty guidance.',
@@ -312,4 +312,61 @@ function updateStatus() { status.textContent = navigator.onLine ? 'Offline ready
 window.addEventListener('online', updateStatus);
 window.addEventListener('offline', updateStatus);
 updateStatus();
+const updateButton = document.querySelector('#update-button');
+const updateLabel = updateButton.querySelector('.update-label');
+let updateResetTimer;
+function showUpdateButtonState(label, accessibleLabel = label) {
+  updateLabel.textContent = label;
+  updateButton.setAttribute('aria-label', accessibleLabel);
+  updateButton.title = accessibleLabel;
+}
+function resetUpdateButton() {
+  updateButton.disabled = false;
+  showUpdateButtonState('Update', 'Check for updates');
+}
+updateButton.addEventListener('click', async () => {
+  clearTimeout(updateResetTimer);
+  if (!navigator.onLine) {
+    showUpdateButtonState('Offline', 'Connect to the internet to check for updates');
+    updateResetTimer = setTimeout(resetUpdateButton, 3000);
+    return;
+  }
+
+  updateButton.disabled = true;
+  showUpdateButtonState('Checking…', 'Checking for app updates');
+  try {
+    const registration = await navigator.serviceWorker?.getRegistration();
+    if (!registration) throw new Error('The offline app service is not available yet.');
+
+    let updateFound = false;
+    let finishUpdateCheck;
+    const updateReady = new Promise(resolve => { finishUpdateCheck = resolve; });
+    const watchWorker = worker => {
+      if (!worker) return;
+      updateFound = true;
+      if (worker.state === 'activated') { finishUpdateCheck(true); return; }
+      worker.addEventListener('statechange', () => {
+        if (worker.state === 'activated') finishUpdateCheck(true);
+        if (worker.state === 'redundant') finishUpdateCheck(false);
+      });
+    };
+    registration.addEventListener('updatefound', () => watchWorker(registration.installing), { once: true });
+    if (registration.installing) watchWorker(registration.installing);
+    await registration.update();
+
+    if (registration.installing && !updateFound) watchWorker(registration.installing);
+    if (registration.installing || updateFound) {
+      const updated = await Promise.race([updateReady, new Promise(resolve => setTimeout(() => resolve(false), 15000))]);
+      if (updated) { window.location.reload(); return; }
+    }
+
+    showUpdateButtonState('Up to date', 'The app is up to date');
+    updateButton.disabled = false;
+    updateResetTimer = setTimeout(resetUpdateButton, 3000);
+  } catch (error) {
+    showUpdateButtonState('Try again', error.message || 'Could not check for updates');
+    updateButton.disabled = false;
+    updateResetTimer = setTimeout(resetUpdateButton, 4000);
+  }
+});
 if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./service-worker.js').catch(() => {}));
