@@ -87,7 +87,7 @@ function renderDestinations() {
 
 function renderDestinationProfile(destination) {
   const facts = data.destinationFacts.filter(fact => fact.code === destination.code);
-  const metadata = `<div class="profile-meta"><div><span>TIME DIFFERENCE</span><strong id="destination-time-difference">Calculating…</strong></div><div><span>CURRENT TIME AT DESTINATION</span><strong id="destination-current-time">Calculating…</strong></div></div>`;
+  const metadata = `<div class="profile-meta"><div><span>CURRENT TIME IN DUBLIN</span><strong id="dublin-current-time">Calculating…</strong></div><div><span>CURRENT TIME AT DESTINATION</span><strong id="destination-current-time">Calculating…</strong></div></div>`;
   if (!facts.length) {
     return metadata + `<div class="empty"><strong>No destination details entered yet</strong>This location is present in the destination index, but the source register has no detailed records for it.</div>`;
   }
@@ -167,34 +167,17 @@ function renderTurnaroundCard(facts) {
   return `<article class="card profile-card"><span class="card-tag">Turnaround Coordination</span><div class="coordination-grid">${cards}${extras}</div></article>`;
 }
 
-function timezoneOffsetMinutes(timeZone, date = new Date()) {
-  const label = new Intl.DateTimeFormat('en', { timeZone, timeZoneName: 'shortOffset' })
-    .formatToParts(date).find(part => part.type === 'timeZoneName')?.value || 'GMT+0';
-  const match = label.match(/(?:GMT|UTC)([+-])(\d{1,2})(?::?(\d{2}))?/);
-  if (!match) return 0;
-  const minutes = Number(match[2]) * 60 + Number(match[3] || 0);
-  return match[1] === '+' ? minutes : -minutes;
-}
-
-function formatTimeDifference(code, date = new Date()) {
-  const zone = destinationTimeZones[code];
-  if (!zone) return 'Unavailable';
-  const difference = timezoneOffsetMinutes(zone, date) - timezoneOffsetMinutes('Europe/Dublin', date);
-  if (difference === 0) return 'Same time as Dublin';
-  const hours = Math.floor(Math.abs(difference) / 60);
-  const minutes = Math.abs(difference) % 60;
-  const duration = `${hours ? `${hours} hour${hours === 1 ? '' : 's'}` : ''}${hours && minutes ? ' ' : ''}${minutes ? `${minutes} minutes` : ''}`;
-  return `${duration} ${difference < 0 ? 'behind' : 'ahead'} of Dublin`;
-}
-
 function updateDestinationClock(destination) {
   const zone = destinationTimeZones[destination.code];
-  const difference = document.querySelector('#destination-time-difference');
+  const dublinTime = document.querySelector('#dublin-current-time');
   const currentTime = document.querySelector('#destination-current-time');
-  if (difference) difference.textContent = formatTimeDifference(destination.code);
+  const now = new Date();
+  if (dublinTime) {
+    dublinTime.textContent = new Intl.DateTimeFormat('en-IE', { timeZone: 'Europe/Dublin', hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZoneName: 'short' }).format(now);
+  }
   if (currentTime) {
     currentTime.textContent = zone
-      ? new Intl.DateTimeFormat('en-IE', { timeZone: zone, hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZoneName: 'short' }).format(new Date())
+      ? new Intl.DateTimeFormat('en-IE', { timeZone: zone, hour: '2-digit', minute: '2-digit', hourCycle: 'h23', timeZoneName: 'short' }).format(now)
       : 'Unavailable';
   }
 }
