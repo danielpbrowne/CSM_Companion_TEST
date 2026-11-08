@@ -78,7 +78,7 @@ function renderCards(cards) {
 function renderDestinations() {
   clearInterval(destinationClockTimer);
   const list = [...data.destinations].sort((a, b) => a.name.localeCompare(b.name)).map(destination => {
-    return `<button class="destination" data-destination="${escapeHtml(destination.code)}"><strong>${escapeHtml(destination.name)}</strong><span>${escapeHtml(destination.code)} →</span></button>`;
+    return `<button class="destination" data-destination="${escapeHtml(destination.code)}"><strong>${escapeHtml(destination.name)}</strong><span>${escapeHtml(destination.code)}</span></button>`;
   }).join('');
   content.innerHTML = heading('DESTINATIONS', sections.destinations.title, sections.destinations.desc)
     + `<div class="destination-list">${list}</div>`;
